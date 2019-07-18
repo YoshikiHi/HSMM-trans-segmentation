@@ -1,4 +1,4 @@
-# encoding: utf8
+#-*- coding: utf-8 -*-
 #from __future__ import unicode_literals
 import numpy as np
 import random
@@ -42,15 +42,17 @@ class HSMMWordSegm():
 
     def load_data(self, filename ):
         # 観測シーケンス
+        # データセットの各行をそれぞれリストにする [[1行目],[2行目],[3行目]]
         self.sequences = [ [ int(i) for i in line.split() ] for line in open( filename ).readlines()]
         
         # 観測の種類
         print( self.sequences )
-        self.num_obs = int(np.max( [ np.max(s) for s in self.sequences] )+1)
+        # リストに格納された値の最大値+1をnum_obsに代入
+        self.num_obs = int(np.max( [ np.max(s) for s in self.sequences] )+1) 
         
         # 観測の遷移確率を計算するためのパラメータ
-        self.obs_trans_count = np.zeros((self.num_class,self.num_obs,self.num_obs) )
-        self.obs_count = np.zeros( (self.num_class,self.num_obs) )
+        self.obs_trans_count = np.zeros((self.num_class,self.num_obs,self.num_obs) ) # クラス数,状態数+1,状態数+1
+        self.obs_count = np.zeros( (self.num_class,self.num_obs) ) #クラス数,状態数+1
 
         # ランダムに分節化        
         self.segm_sequences = []
@@ -58,21 +60,20 @@ class HSMMWordSegm():
             segms = []
 
             i = 0
-            while i<len(seq):
+            while i<len(seq): #（1行ごとに）i以上であれば繰り返す
                 # ランダムに切る
                 length = random.randint(1,self.MAX_LEN)
 
                 if i+length>=len(seq):
                     length = len(seq)-i
 
-                segms.append( seq[i:i+length] )
+                segms.append( seq[i:i+length] ) # 分節した箇所でsegmsに格納
+                i+=length # 分節後の先頭を変更するための処理
 
-                i+=length
-
-            self.segm_sequences.append( segms )
+            self.segm_sequences.append( segms ) # 1行分のランダム分節結果をsegm_sequenceに格納
 
             # ランダムに割り振る
-            for i,segm in enumerate(segms):
+            for i,segm in enumerate(segms): # 例: 0,[1,2,1]
                 c = random.randint(0,self.num_class-1)
                 self.add_segm( c, segm )
 
@@ -296,7 +297,7 @@ class HSMMWordSegm():
 
 
 def main():
-    segm = HSMMWordSegm( 3 )
+    segm = HSMMWordSegm( 3 ) # データの個数を指定
     segm.load_data( "data.txt" )
     segm.print_result()
 
